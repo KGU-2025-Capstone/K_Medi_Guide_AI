@@ -12,7 +12,6 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 mongo_client = MongoClient(MONGODB_URI)
 db = mongo_client['K_Medi_Guide']
 collection = db['Api']
-session_results = {}
 
 bp = Blueprint('detail', __name__)
 

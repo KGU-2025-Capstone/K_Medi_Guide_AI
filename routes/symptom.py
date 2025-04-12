@@ -15,10 +15,6 @@ mongo_client = MongoClient(MONGODB_URI)
 db = mongo_client['K_Medi_Guide']
 collection = db['Api']
 
-retry_count = {}
-session_symptoms = {}
-session_lang = {}
-
 bp = Blueprint('symptom', __name__)
 
 @bp.route('/symptom', methods=['POST'])

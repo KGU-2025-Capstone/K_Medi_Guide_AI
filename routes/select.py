@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from pymongo import MongoClient
 from openai import OpenAI
-from services.session_store import session_symptoms, session_results, session_lang
+from services.session_store import session_symptoms, session_results
 from services.gpt_service import translate_to_user_lang
 from services.utils import clean_text
 from concurrent.futures import ThreadPoolExecutor
@@ -12,10 +12,6 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 mongo_client = MongoClient(MONGODB_URI)
 db = mongo_client['K_Medi_Guide']
 collection = db['Api']
-
-session_symptoms = {}
-session_results = {}
-session_lang = {}
 
 bp = Blueprint('select', __name__)
 
