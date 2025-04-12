@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: K-Medi-Guide AI API
+  version: 1.0.0
+  description: 증상 및 약 이름 기반 의약품 추천 및 정보 제공 API
+
+paths:
+  /medicine/symptom:
+    post:
+      summary: 증상 기반 약 추천
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                input:
+                  type: string
+      responses:
+        '200':
+          description: 추천 약 리스트 제공
+        '400':
+          description: 입력 오류
+        '500':
+          description: GPT 호출 오류
+
+  /medicine/select:
+    post:
+      summary: 선택한 약에 대한 설명
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                selected_item:
+                  type: string
+      responses:
+        '200':
+          description: 약의 작용 설명 제공
+        '404':
+          description: 약 정보 없음
+
+  /medicine/detail:
+    post:
+      summary: 복용법 및 주의사항 안내
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                reply:
+                  type: string
+      responses:
+        '200':
+          description: 복용법 및 주의사항 제공
+        '500':
+          description: GPT 오류
+
+  /medicine/name:
+    post:
+      summary: 입력 문장에서 약 이름 추출 및 추천
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                input:
+                  type: string
+      responses:
+        '200':
+          description: 후보 약 목록 반환
+        '404':
+          description: 추출 실패

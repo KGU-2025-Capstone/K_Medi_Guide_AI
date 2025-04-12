@@ -1,0 +1,11 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+MONGODB_URI = os.getenv("MONGODB_URI")
+FINE_TUNE_SYMPTOM_MODEL = os.getenv("FINE_TUNE_SYMPTOM_MODEL")
+FINE_TUNE_EFCY_MODEL = os.getenv("FINE_TUNE_EFCY_MODEL")
+FINE_TUNE_USEMETHOD_MODEL = os.getenv("FINE_TUNE_USEMETHOD_MODEL")
+FINE_TUNE_ATPN_MODEL = os.getenv("FINE_TUNE_ATPN_MODEL")
