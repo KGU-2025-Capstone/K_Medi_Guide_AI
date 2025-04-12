@@ -26,11 +26,13 @@ def select_medicine():
     selected_name = data.get("selected_item", "").strip()
 
     if not selected_name:
-        return jsonify({"error": translate_to_user_lang(session_id, "선택한 약 이름이 필요합니다.")}), 400
+        return jsonify({"error": translate_to_user_lang(session_id, "선택한 약 이름이 필요합니다."),
+                        "next": "/start"}), 400
 
     result = collection.find_one({"itemName": {"$regex": re.escape(selected_name), "$options": "i"}})
     if not result:
-        return jsonify({"error": translate_to_user_lang(session_id, f"'{selected_name}' 이름의 약을 찾을 수 없습니다.")}), 404
+        return jsonify({"error": translate_to_user_lang(session_id, f"'{selected_name}' 이름의 약을 찾을 수 없습니다."),
+                        "next": "/start"}), 404
 
     name_ko = result.get("itemName", "")
     name_en = result.get("engName", "")
@@ -64,7 +66,7 @@ def select_medicine():
         efcy_response = future_efcy.result()
 
     except Exception as e:
-        return jsonify({"error": translate_to_user_lang(session_id, "GPT 호출 중 오류 발생"), "details": str(e)}), 500
+        return jsonify({"error": translate_to_user_lang(session_id, "챗봇 호출 중 오류 발생"), "details": str(e),"next": "/start"}), 500
 
     session_results[session_id] = {"itemName": name_ko, "engName": name_en}
     final_message = f"{symptom_response} {combined_name}은(는) {efcy_response}"
@@ -73,5 +75,6 @@ def select_medicine():
         "itemName": combined_name,
         "message": translate_to_user_lang(session_id, final_message),
         "addMessage": translate_to_user_lang(session_id, "복용법과 주의사항도 알려드릴까요?"),
-        "symptoms": [translate_to_user_lang(session_id, s) for s in symptoms_ko]
+        "symptoms": [translate_to_user_lang(session_id, s) for s in symptoms_ko],
+        "next": "/detail"
     })

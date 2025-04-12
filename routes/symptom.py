@@ -31,7 +31,8 @@ def recommend_medicine_by_symptom():
 
     if not symptom_input:
         return jsonify({
-            "error": translate_to_user_lang(session_id, "입력이 필요합니다.")
+            "error": translate_to_user_lang(session_id, "입력이 필요합니다."),
+            "next": "/start"
         }), 400
 
     prompt = f"""
@@ -51,12 +52,14 @@ def recommend_medicine_by_symptom():
     except Exception as e:
         return jsonify({
             "error": translate_to_user_lang(session_id, "증상 추출 중 오류 발생"),
-            "details": str(e)
+            "details": str(e),
+            "next": "/start"
         }), 500
 
     if not symptoms_ko:
         return jsonify({
-            "error": translate_to_user_lang(session_id, "증상 키워드를 추출하지 못했습니다.")
+            "error": translate_to_user_lang(session_id, "증상 키워드를 추출하지 못했습니다."),
+            "next": "/start"
         }), 400
 
     results = []
@@ -76,12 +79,14 @@ def recommend_medicine_by_symptom():
         retry_count[session_id] = retry_count.get(session_id, 0) + 1
         if retry_count[session_id] >= 3:
             return jsonify({
-                "error": translate_to_user_lang(session_id, "3회 시도에도 약을 찾지 못했습니다. 처음으로 돌아갑니다.")
+                "error": translate_to_user_lang(session_id, "3회 시도에도 약을 찾지 못했습니다. 처음으로 돌아갑니다."),
+                "next": "/start"
             }), 404
         else:
             return jsonify({
                 "error": translate_to_user_lang(session_id, f"해당 증상에 맞는 약을 찾지 못했습니다. 다시 입력해주세요. ({retry_count[session_id]}/3)"),
-                "extracted_symptoms": [translate_to_user_lang(session_id, s) for s in symptoms_ko]
+                "extracted_symptoms": [translate_to_user_lang(session_id, s) for s in symptoms_ko],
+                "next": "/symptom"
             }), 404
 
     session_symptoms[session_id] = symptoms_ko
@@ -108,5 +113,6 @@ def recommend_medicine_by_symptom():
     return jsonify({
         "extracted_symptoms": [translate_to_user_lang(session_id, s) for s in symptoms_ko],
         "medicine_candidates": candidates,
-        "message": translate_to_user_lang(session_id, "다음 중 어떤 약이 궁금하신가요?")
+        "message": translate_to_user_lang(session_id, "다음 중 어떤 약이 궁금하신가요?"),
+        "next": "/select"
     })

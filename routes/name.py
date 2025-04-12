@@ -39,7 +39,7 @@ def extract_and_match_medicine_name():
         )
         extracted_name = response.choices[0].message.content.strip()
     except Exception as e:
-        return jsonify({"error": translate_to_user_lang(session_id, "약 이름 추출 중 오류 발생"), "details": str(e)}), 500
+        return jsonify({"error": translate_to_user_lang(session_id, "약 이름 추출 중 오류 발생"), "details": str(e),"next": "/start"}), 500
 
     query = {"itemName": {"$regex": extracted_name, "$options": "i"}} if re.search(r'[가-힣]', extracted_name) else {"engName": {"$regex": extracted_name, "$options": "i"}}
     matching_docs = list(collection.find(query))
@@ -47,8 +47,8 @@ def extract_and_match_medicine_name():
     if not matching_docs:
         attempts[session_id] = attempts.get(session_id, 0) + 1
         if attempts[session_id] >= 2:
-            return jsonify({"error": translate_to_user_lang(session_id, "2회 시도 실패. 처음부터 다시 입력해주세요.")}), 404
-        return jsonify({"error": translate_to_user_lang(session_id, "관련된 약 이름을 찾지 못했습니다."), "extracted_name": extracted_name}), 404
+            return jsonify({"error": translate_to_user_lang(session_id, "2회 시도 실패. 처음부터 다시 입력해주세요."), "next": "/name"}), 404
+        return jsonify({"error": translate_to_user_lang(session_id, "관련된 약 이름을 찾지 못했습니다."), "extracted_name": extracted_name, "next": "/name"}), 404
 
     weights = [float(doc.get("weight", 1.0)) for doc in matching_docs]
     probabilities = softmax_with_temperature(weights, temperature=1.0)
@@ -68,5 +68,6 @@ def extract_and_match_medicine_name():
     return jsonify({
         "extracted_name": extracted_name,
         "candidates": candidates,
-        "message": translate_to_user_lang(session_id, "다음 중 어떤 약이 궁금하신가요?")
+        "message": translate_to_user_lang(session_id, "다음 중 어떤 약이 궁금하신가요?"),
+        "next": "/select"
     })
