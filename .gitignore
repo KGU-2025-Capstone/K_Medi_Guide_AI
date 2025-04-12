@@ -1,6 +1,38 @@
-# .env (환경변수 파일)
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+
+# dotenv
 .env
-fine_tune_atpn_to_response.jsonl
-fine_tune_efcy_to_response.jsonl
-fine_tune_symptom_to_response.jsonl
-fine_tune_useMethod_to_response.jsonl
+
+# MacOS
+.DS_Store
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# MongoDB dumps or backups
+*.bson
+*.json
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Local data
+data/
+
+# Ignore compiled models or temp
+*.pkl
+*.pt
+*.h5
