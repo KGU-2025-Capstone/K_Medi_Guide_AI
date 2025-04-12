@@ -23,7 +23,7 @@ def provide_medicine_details():
     user_reply = data.get("reply", "").strip()
 
     if not user_reply:
-        return jsonify({"error": translate_to_user_lang(session_id, "사용자 응답이 필요합니다.")}), 400
+        return jsonify({"error": translate_to_user_lang(session_id, "사용자 응답이 필요합니다."), "next": "/detail"}), 400
 
     prompt = f"""
     사용자가 약에 대한 복용법과 주의사항을 더 알고 싶어하는지 판단해줘.
@@ -40,11 +40,13 @@ def provide_medicine_details():
         ).choices[0].message.content.strip().upper()
 
         if "YES" not in answer:
-            return jsonify({"message": translate_to_user_lang(session_id, "알겠습니다. 복용법과 주의사항은 생략할게요.")})
+            return jsonify({"message": translate_to_user_lang(session_id, "알겠습니다. 복용법과 주의사항은 생략할게요."),
+                            "next": "/start",
+                            "addMessage": translate_to_user_lang(session_id, "더 궁금한 게 있으신가요?")})
 
         result = session_results.get(session_id)
         if not result:
-            return jsonify({"error": translate_to_user_lang(session_id, "세션에 저장된 약 정보가 없습니다.")}), 404
+            return jsonify({"error": translate_to_user_lang(session_id, "저장된 약 정보가 없습니다."), "next": "/start"}), 404
 
         item_name = result["itemName"]
         name_en = result.get("engName", "")
@@ -52,7 +54,7 @@ def provide_medicine_details():
 
         original = collection.find_one({"itemName": {"$regex": re.escape(item_name), "$options": "i"}})
         if not original:
-            return jsonify({"error": translate_to_user_lang(session_id, f"'{item_name}' 약 정보를 DB에서 찾을 수 없습니다.")}), 404
+            return jsonify({"error": translate_to_user_lang(session_id, f"'{item_name}'에 대한 정보를 찾을 수 없습니다."), "next": "/start"}), 404
 
         use_text = clean_text(original.get("useMethodQesitm", ""))
         atpn_text = clean_text(original.get("atpnQesitm", ""))
@@ -86,8 +88,10 @@ def provide_medicine_details():
 
         return jsonify({
             "itemName": item_name,
-            "detailMessage": translate_to_user_lang(session_id, final_message)
+            "detailMessage": translate_to_user_lang(session_id, final_message),
+            "addMessage": translate_to_user_lang(session_id, "더 궁금한 게 있으신가요?"),
+            "next": "/start"
         })
 
     except Exception as e:
-        return jsonify({"error": translate_to_user_lang(session_id, "GPT 호출 중 오류 발생"), "details": str(e)}), 500
+        return jsonify({"error": translate_to_user_lang(session_id, "챗봇 호출 중 오류 발생"), "details": str(e), "next": "/start"}), 500
