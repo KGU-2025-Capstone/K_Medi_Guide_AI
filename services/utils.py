@@ -8,7 +8,6 @@ def clean_text(html):
     return BeautifulSoup(html or "", "html.parser").get_text(strip=True).replace("\n", " ").replace("\r", " ")
 
 # 소프트맥스 with temperature
-
 def softmax_with_temperature(weights, temperature):
     weights = np.array(weights)
     scaled = weights / temperature
@@ -27,19 +26,14 @@ def trim_to_token_limit(text, max_tokens, model="gpt-3.5-turbo"):
     else:
         return truncated_text.strip()
 
-# 번역 함수
-
 def detect_language(text):
     if re.search(r"[ㄱ-ㅎㅏ-ㅣ가-힣]", text):
-        return "ko"
+        return "한국어"
     elif re.search(r"[A-Za-z]", text):
-        return "en"
+        return "영어"
     elif re.search(r"[\u3040-\u30ff]", text):  # 히라가나 + 가타카나
-        return "ja"
+        return "일본어"
     elif re.search(r"[\u4e00-\u9fff]", text):  # 한자 (중국어)
-        return "zh"
+        return "중국어"
     else:
-        return "ko"  # 기본값은 한국어
-
-
-# 텍스트 클리너
+        return "한국어"  # 기본값은 한국어

@@ -5,3 +5,4 @@ session_symptoms = {}
 session_results = {}
 retry_count = {}
 attempts = {}
+name_to_select = {}

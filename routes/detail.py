@@ -3,30 +3,32 @@ from pymongo import MongoClient
 from openai import OpenAI
 from services.session_store import session_results
 from services.gpt_service import translate_to_user_lang
-from services.utils import clean_text, trim_to_token_limit, detect_language
+from services.utils import clean_text, trim_to_token_limit
 from concurrent.futures import ThreadPoolExecutor
 from config import OPENAI_API_KEY, MONGODB_URI, FINE_TUNE_USEMETHOD_MODEL, FINE_TUNE_ATPN_MODEL
 import re
 
+#환경 및 라우트 설정
 client = OpenAI(api_key=OPENAI_API_KEY)
 mongo_client = MongoClient(MONGODB_URI)
 db = mongo_client['K_Medi_Guide']
 collection = db['Api']
-
 bp = Blueprint('detail', __name__)
 
 @bp.route('/detail', methods=['POST'])
 def provide_medicine_details():
+    #사용자 입력
     data = request.get_json()
     session_id = data.get("session_id", "default")
-    user_reply = data.get("reply", "").strip()
+    user_reply = data.get("input", "").strip()
 
     if not user_reply:
-        return jsonify({"error": translate_to_user_lang(session_id, "사용자 응답이 필요합니다."), "next": "/detail"}), 400
+        return jsonify({"error": translate_to_user_lang(session_id, "사용자 응답이 필요합니다."), "next": "/detail", "response_type": "detail_fail"}), 400
 
+    #복용법 및 주의사항 출력 여부 확인 모델
     prompt = f"""
     사용자가 약에 대한 복용법과 주의사항을 더 알고 싶어하는지 판단해줘.
-    언어는 한국어, 영어, 중국어, 일본어일 수 있어. 긍정이면 "YES", 아니면 "NO"만 대답해.
+    언어는 한국어, 영어, 중국어, 일본어일 수 있어. 긍정이면 "YES", 아니면 "NO"만 대답해. 헷갈리면 무조건 "YES"라고 판단해.
     사용자 응답: "{user_reply}"
     """
     try:
@@ -41,11 +43,12 @@ def provide_medicine_details():
         if "YES" not in answer:
             return jsonify({"message": translate_to_user_lang(session_id, "알겠습니다. 복용법과 주의사항은 생략할게요."),
                             "next": "/start",
-                            "addMessage": translate_to_user_lang(session_id, "더 궁금한 게 있으신가요?")})
+                            "addMessage": translate_to_user_lang(session_id, "더 궁금한 게 있으신가요?"),
+                            "response_type": "detail_fail"})
 
         result = session_results.get(session_id)
         if not result:
-            return jsonify({"error": translate_to_user_lang(session_id, "저장된 약 정보가 없습니다."), "next": "/start"}), 404
+            return jsonify({"error": translate_to_user_lang(session_id, "저장된 약 정보가 없습니다."), "next": "/start", "response_type": "detail_fail"}), 404
 
         item_name = result["itemName"]
         name_en = result.get("engName", "")
@@ -53,7 +56,7 @@ def provide_medicine_details():
 
         original = collection.find_one({"itemName": {"$regex": re.escape(item_name), "$options": "i"}})
         if not original:
-            return jsonify({"error": translate_to_user_lang(session_id, f"'{item_name}'에 대한 정보를 찾을 수 없습니다."), "next": "/start"}), 404
+            return jsonify({"error": translate_to_user_lang(session_id, f"'{item_name}'에 대한 정보를 찾을 수 없습니다."), "next": "/start", "response_type": "detail_fail"}), 404
 
         use_text = clean_text(original.get("useMethodQesitm", ""))
         atpn_text = clean_text(original.get("atpnQesitm", ""))
@@ -83,14 +86,14 @@ def provide_medicine_details():
         use_response = future_use.result()
         atpn_response = future_atpn.result()
 
-        final_message = f"{combined_name}은(는) {use_response} {atpn_response}"
+        final_message = f"💊{combined_name}\n{use_response}\n{atpn_response}"
 
         return jsonify({
-            "itemName": item_name,
             "detailMessage": translate_to_user_lang(session_id, final_message),
             "addMessage": translate_to_user_lang(session_id, "더 궁금한 게 있으신가요?"),
-            "next": "/start"
+            "next": "/start",
+            "response_type": "detail_success"
         })
 
     except Exception as e:
-        return jsonify({"error": translate_to_user_lang(session_id, "챗봇 호출 중 오류 발생"), "details": str(e), "next": "/start"}), 500
+        return jsonify({"error": translate_to_user_lang(session_id, "챗봇 호출 중 오류 발생"), "details": str(e), "next": "/start", "response_type": "detail_fail"}), 500
