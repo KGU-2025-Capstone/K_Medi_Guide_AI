@@ -1,7 +1,9 @@
 from flask import Flask
 from routes import symptom, select, detail, name, start
+from config import FLASK_SECRET_KEY
 
 app = Flask(__name__)
+app.secret_key = FLASK_SECRET_KEY
 app.register_blueprint(symptom.bp, url_prefix='/api/medicine')
 app.register_blueprint(select.bp, url_prefix='/api/medicine')
 app.register_blueprint(detail.bp, url_prefix='/api/medicine')
