@@ -1,7 +1,6 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from openai import OpenAI
-from services.session_store import session_results
 from services.gpt_service import translate_to_user_lang
 from services.utils import clean_text, trim_to_token_limit
 from concurrent.futures import ThreadPoolExecutor
@@ -19,11 +18,10 @@ bp = Blueprint('detail', __name__)
 def provide_medicine_details():
     #사용자 입력
     data = request.get_json()
-    session_id = data.get("session_id", "default")
     user_reply = data.get("input", "").strip()
 
     if not user_reply:
-        return jsonify({"error": translate_to_user_lang(session_id, "사용자 응답이 필요합니다."), "next": "/detail", "response_type": "detail_fail"}), 400
+        return jsonify({"error": translate_to_user_lang("사용자 응답이 필요합니다."), "next": "/detail", "response_type": "detail_fail"}), 400
 
     #복용법 및 주의사항 출력 여부 확인 모델
     prompt = f"""
@@ -41,14 +39,14 @@ def provide_medicine_details():
         ).choices[0].message.content.strip().upper()
 
         if "YES" not in answer:
-            return jsonify({"message": translate_to_user_lang(session_id, "알겠습니다. 복용법과 주의사항은 생략할게요."),
+            return jsonify({"message": translate_to_user_lang("알겠습니다. 복용법과 주의사항은 생략할게요."),
                             "next": "/start",
-                            "addMessage": translate_to_user_lang(session_id, "더 궁금한 게 있으신가요?"),
+                            "addMessage": translate_to_user_lang("더 궁금한 게 있으신가요?"),
                             "response_type": "detail_fail"})
 
-        result = session_results.get(session_id)
+        result = session.get('results')
         if not result:
-            return jsonify({"error": translate_to_user_lang(session_id, "저장된 약 정보가 없습니다."), "next": "/start", "response_type": "detail_fail"}), 404
+            return jsonify({"error": translate_to_user_lang("저장된 약 정보가 없습니다."), "next": "/start", "response_type": "detail_fail"}), 404
 
         item_name = result["itemName"]
         name_en = result.get("engName", "")
@@ -56,7 +54,7 @@ def provide_medicine_details():
 
         original = collection.find_one({"itemName": {"$regex": re.escape(item_name), "$options": "i"}})
         if not original:
-            return jsonify({"error": translate_to_user_lang(session_id, f"'{item_name}'에 대한 정보를 찾을 수 없습니다."), "next": "/start", "response_type": "detail_fail"}), 404
+            return jsonify({"error": translate_to_user_lang(f"'{item_name}'에 대한 정보를 찾을 수 없습니다."), "next": "/start", "response_type": "detail_fail"}), 404
 
         use_text = clean_text(original.get("useMethodQesitm", ""))
         atpn_text = clean_text(original.get("atpnQesitm", ""))
@@ -89,11 +87,11 @@ def provide_medicine_details():
         final_message = f"💊{combined_name}\n{use_response}\n{atpn_response}"
 
         return jsonify({
-            "detailMessage": translate_to_user_lang(session_id, final_message),
-            "addMessage": translate_to_user_lang(session_id, "더 궁금한 게 있으신가요?"),
+            "detailMessage": translate_to_user_lang(final_message),
+            "addMessage": translate_to_user_lang("더 궁금한 게 있으신가요?"),
             "next": "/start",
             "response_type": "detail_success"
         })
 
     except Exception as e:
-        return jsonify({"error": translate_to_user_lang(session_id, "챗봇 호출 중 오류 발생"), "details": str(e), "next": "/start", "response_type": "detail_fail"}), 500
+        return jsonify({"error": translate_to_user_lang("챗봇 호출 중 오류 발생"), "details": str(e), "next": "/start", "response_type": "detail_fail"}), 500
