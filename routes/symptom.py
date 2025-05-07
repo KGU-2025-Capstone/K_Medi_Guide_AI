@@ -108,15 +108,15 @@ def recommend_medicine_by_symptom():
     candidates = []
     for r in sampled:
         name_ko = r.get("itemName", "")
-        name_en = r.get("engName", "")
+        name_en = r.get("engName", ""),
         combined_name = f"{name_ko} ({name_en})" if name_en else name_ko
         efcy_raw = clean_text(r.get("efcyQesitm", ""))
         translated_efcy = translate_to_user_lang(efcy_raw)
 
         candidates.append({
             "itemName": combined_name,
-            "efcyQesitm": translated_efcy,
-            "weight": float(r.get("weight", 1.0))
+            "name_ko": name_ko,
+            "efcyQesitm": translated_efcy
         })
 
     #시도 횟수 초기화 및 정보 반환

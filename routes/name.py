@@ -55,7 +55,7 @@ def extract_and_match_medicine_name():
         combined_name = f"{name_ko}({name_en})" if name_en else name_ko
         candidates.append({
             "itemName": combined_name,
-            "weight": float(doc.get("weight", 1.0))
+            "name_ko": name_ko
         })
 
     #시도 횟수 초기화 및 정보 반환
