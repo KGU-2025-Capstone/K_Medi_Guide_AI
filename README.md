@@ -50,6 +50,9 @@ FINE_TUNE_SYMPTOM_MODEL=
 FINE_TUNE_EFCY_MODEL=
 FINE_TUNE_USEMETHOD_MODEL=
 FINE_TUNE_ATPN_MODEL=
+FINE_TUNE_SYMPTOM_EXTRACT_MODEL
+PURE_FINE_TUNE_EFCY_MODEL
+FLASK_SECRET_KEY
 ```
 
 ## 📌 주요 API
@@ -58,7 +61,7 @@ FINE_TUNE_ATPN_MODEL=
 - `POST /medicine/select` : 선택한 약에 대한 설명 생성
 - `POST /medicine/detail` : 복용법/주의사항 제공
 - `POST /medicine/name` : 약 이름 추출 및 후보 제공
-- `POST /medicine/start` : 챗봇 첫 시작 로직 담당
+- `POST /medicine/start` : 챗봇 첫 시작 로직 담당 및 DB기반 일반의약품 질문 처리
 
 ## 📄 Swagger 문서
 
