@@ -19,6 +19,8 @@ def start_route():
     # Flask 세션에 언어 정보 저장
     session['language'] = detect_language(user_input)
 
+    session['retry_count'] = 0
+    
     if user_input == "증상" or user_input == "symptom":
         return jsonify({
             "next": "/symptom",
