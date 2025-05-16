@@ -38,7 +38,7 @@ def extract_and_match_medicine_name():
     #약 검색에 실패할 경우 3회 재시도 가능. 초과할 경우 처음으로 돌아감.
     if not matching_docs:
         session['retry_count'] = get_retry_count() + 1
-        if get_retry_count >= 3:
+        if get_retry_count() >= 3:
             session['retry_count'] = 0
             return jsonify({"error": translate_to_user_lang("3회 시도에도 약을 찾지 못했습니다. 처음으로 돌아갑니다."), "next": "/start", "response_type": "name_fail"}), 404
         return jsonify({"error": translate_to_user_lang(f"관련된 약 이름을 찾지 못했습니다. 다시 입력해주세요. ({get_retry_count()}/3)"), "next": "/name", "response_type": "name_fail"}), 404
