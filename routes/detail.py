@@ -24,21 +24,20 @@ def provide_medicine_details():
         return jsonify({"error": translate_to_user_lang("사용자 응답이 필요합니다."), "next": "/detail", "response_type": "detail_fail"}), 400
 
     #복용법 및 주의사항 출력 여부 확인 모델
-    prompt = f"""
-    사용자가 약에 대한 복용법과 주의사항을 더 알고 싶어하는지 판단해줘.
-    언어는 한국어, 영어, 중국어, 일본어일 수 있어. 긍정이면 "YES", 아니면 "NO"만 대답해. 헷갈리면 무조건 "YES"라고 판단해.
-    사용자 응답: "{user_reply}"
-    """
+    # prompt = f"""
+    # 사용자가 약에 대한 복용법과 주의사항을 더 알고 싶어하는지 판단해줘.
+    # 주어진 값이 YES 면 알고싶어하는거고 NO 이면 알고싶지 않은거야 "{user_reply}"
+    # """
     try:
-        answer = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "다국어 응답을 YES 또는 NO로만 판단해줘."},
-                {"role": "user", "content": prompt}
-            ]
-        ).choices[0].message.content.strip().upper()
+        # answer = client.chat.completions.create(
+        #     model="gpt-3.5-turbo",
+        #     messages=[
+        #         {"role": "system", "content": "다국어 응답을 YES 또는 NO로만 판단해줘."},
+        #         {"role": "user", "content": prompt}
+        #     ]
+        # ).choices[0].message.content.strip().upper()
 
-        if "YES" not in answer:
+        if user_reply == "NO":
             return jsonify({"message": translate_to_user_lang("알겠습니다. 복용법과 주의사항은 생략할게요."),
                             "next": "/start",
                             "addMessage": translate_to_user_lang("더 궁금한 게 있으신가요?"),
