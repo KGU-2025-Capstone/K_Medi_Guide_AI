@@ -39,7 +39,7 @@ def fallback_response(user_input):
 
         # 이 문맥을 GPT 모델에 제공하여 답변을 도출하게 함
         history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
-        context += f"\n이전 대화:\n{history_text}\n\n이전 대화를 바탕으로 다음 질문에 대답하세요. 질문: {user_input}"
+        context += f"\n이전 대화:\n{history_text}\n\n이전 대화를 바탕으로 다음 질문에 대답하세요. 잘 모르겠으면 모르겠다고 대답하세요. 이모지와 줄바꿈을 활용해서 가독성이 좋게 대답하세요. 질문: {user_input}"
 
         # OpenAI API로 메시지 전송
         messages = [
@@ -49,7 +49,8 @@ def fallback_response(user_input):
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=messages
+            messages=messages,
+            temperature= 0.7
         )
 
         answer = response.choices[0].message.content.strip()

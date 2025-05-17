@@ -50,12 +50,16 @@ def select_medicine():
     #증상, 효능 문장 생성 모델 병렬처리
     try:
         with ThreadPoolExecutor() as executor:
-            future_symptom = executor.submit(lambda: client.chat.completions.create(
+            if symptoms_ko and isinstance(symptoms_ko, list):
+                future_symptom = executor.submit(lambda: client.chat.completions.create(
                 model=FINE_TUNE_SYMPTOM_MODEL,
                 messages=[{"role": "user", "content": ", ".join(symptoms_ko)}],
                 max_tokens=60,
                 temperature=0.8
             ).choices[0].message.content.strip())
+            
+            else:
+                future_symptom = None
 
             future_efcy = executor.submit(lambda: client.chat.completions.create(
                 model=PURE_FINE_TUNE_EFCY_MODEL,
@@ -63,7 +67,7 @@ def select_medicine():
                 max_tokens=250,
                 temperature=0.8
             ).choices[0].message.content.strip())
-        symptom_response = future_symptom.result()
+        symptom_response = future_symptom.result() if future_symptom else ""
         efcy_response = future_efcy.result()
     except Exception as e:
         return jsonify({"error": translate_to_user_lang("챗봇 호출 중 오류 발생"), "details": str(e),"next": "/start", "response_type": "select_fail"}), 500
