@@ -86,7 +86,7 @@ def provide_medicine_details():
         final_message = f"💊{combined_name}\n{use_response}\n{atpn_response}"
 
         return jsonify({
-            "detailMessage": translate_to_user_lang(final_message),
+            "message": translate_to_user_lang(final_message),
             "addMessage": translate_to_user_lang("더 궁금한 게 있으신가요?"),
             "next": "/start",
             "response_type": "detail_success"
