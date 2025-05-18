@@ -125,7 +125,7 @@ def recommend_medicine_by_symptom():
             return jsonify({
                 "error": translate_to_user_lang("3회 시도에도 약을 찾지 못했습니다. 처음으로 돌아갑니다."),
                 "next": "/start",
-                "response_type": "symptom_fail"
+                "response_type": "symptom_all_fail"
             }), 404
         else:
             return jsonify({
