@@ -6,19 +6,27 @@ from services.utils import detect_language
 
 bp = Blueprint('start', __name__)
 
+@bp.route('/makeSession' , methods=['POST'])
+def makeSession():
+    new_session_id = str(uuid.uuid4())
+    session['session_id'] = new_session_id
+    session['language'] = "KO"
+    session['retry_count'] = 0
+
+    return jsonify({'session_id': new_session_id})
+
 @bp.route('/start', methods=['POST'])
 def start_route():
     data = request.get_json()
     user_input = data.get("input", "").strip().lower()
+    session_id = session['session_id']
 
-    session_id = session.get('session_id')
     if not session_id:
         session['session_id'] = str(uuid.uuid4())
         session_id = session['session_id']
 
     # Flask 세션에 언어 정보 저장
     session['language'] = detect_language(user_input)
-
     session['retry_count'] = 0
     
     if user_input == "증상" or user_input == "symptom":
