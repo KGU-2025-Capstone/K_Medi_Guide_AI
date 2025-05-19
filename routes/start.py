@@ -29,14 +29,14 @@ def start_route():
     session['language'] = detect_language(user_input)
     session['retry_count'] = 0
     
-    if user_input == "증상" or user_input == "symptom":
+    if user_input == "증상" or user_input == "symptom" or user_input == "症状" or user_input == "症状" :
         return jsonify({
             "next": "/symptom",
             "message": translate_to_user_lang("어디가 아프신가요? 증상을 자세히 말씀해주세요."),
             "response_type": "start_success"
         })
 
-    elif user_input == "약" or user_input == "약명" or user_input == "name":
+    elif user_input == "약" or user_input == "medicine" or user_input == "药" or user_input == "薬":
         return jsonify({
             "next": "/name",
             "message": translate_to_user_lang("어떤 약이 궁금하신가요? 약 이름을 말해주세요."),
@@ -44,9 +44,11 @@ def start_route():
         })
 
     # 기타 입력 → fallback GPT 응답
-    gpt_reply = fallback_response(user_input)
+    else :
+        gpt_reply = fallback_response(user_input)
     return jsonify({
         "message": translate_to_user_lang(gpt_reply),
         "next": "/start",
         "response_type": "start_gpt_success"
     })
+    
