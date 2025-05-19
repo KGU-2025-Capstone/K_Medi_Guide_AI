@@ -1,0 +1,7 @@
+flask
+pymongo
+openai
+dotenv
+bs4
+numpy
+tiktoken

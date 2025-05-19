@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+
+# dotenv
+.env
+
+# MacOS
+.DS_Store
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# MongoDB dumps or backups
+*.bson
+*.json
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Local data
+data/
+
+# Ignore compiled models or temp
+*.pkl
+*.pt
+*.h5
