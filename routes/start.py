@@ -10,7 +10,6 @@ bp = Blueprint('start', __name__)
 def makeSession():
     new_session_id = str(uuid.uuid4())
     session['session_id'] = new_session_id
-    session['language'] = "KO"
     session['retry_count'] = 0
 
     return jsonify({'session_id': new_session_id})
@@ -20,13 +19,12 @@ def start_route():
     data = request.get_json()
     user_input = data.get("input", "").strip().lower()
     session_id = session['session_id']
+    session['language'] = data.get("lang")
 
     if not session_id:
         session['session_id'] = str(uuid.uuid4())
         session_id = session['session_id']
-
-    # Flask 세션에 언어 정보 저장
-    session['language'] = detect_language(user_input)
+        
     session['retry_count'] = 0
     
     if user_input == "증상" or user_input == "symptom" or user_input == "症状" or user_input == "症状" :

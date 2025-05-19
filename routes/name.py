@@ -22,7 +22,6 @@ def extract_and_match_medicine_name():
     #사용자 입력
     data = request.get_json()
     user_input = data.get("input", "")
-    session['language'] = detect_language(user_input)
 
     #name라우트에서 select라우트로 갈 경우 select출력 문장에서 증상 부분을 제외하기 위한 설정
     session['name_to_select'] = True

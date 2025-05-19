@@ -25,8 +25,7 @@ def recommend_medicine_by_symptom():
     data = request.get_json()
     symptom_input = data.get("input", "")
 
-    #사용자 입력 언어 감지 및 이전 라우트 확인
-    session['language'] = detect_language(symptom_input)
+    #이전 라우트 확인
     session['name_to_select'] = False
 
     if not symptom_input:
