@@ -2,7 +2,6 @@ import uuid
 from flask import Blueprint, request, jsonify, session
 from services.gpt_fallback import fallback_response
 from services.gpt_service import translate_to_user_lang
-from services.utils import detect_language
 
 bp = Blueprint('start', __name__)
 
@@ -24,7 +23,7 @@ def start_route():
     if not session_id:
         session['session_id'] = str(uuid.uuid4())
         session_id = session['session_id']
-        
+
     session['retry_count'] = 0
     
     if user_input == "증상" or user_input == "symptom" or user_input == "症状" or user_input == "症状" :

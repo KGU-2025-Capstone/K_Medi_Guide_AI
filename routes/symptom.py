@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from openai import OpenAI
 from services.gpt_service import translate_to_user_lang
-from services.utils import clean_text, softmax_with_temperature, detect_language
+from services.utils import clean_text, softmax_with_temperature
 from bs4 import BeautifulSoup
 import numpy as np
 from config import OPENAI_API_KEY, MONGODB_URI

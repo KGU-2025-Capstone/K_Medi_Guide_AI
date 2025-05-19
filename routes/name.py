@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from openai import OpenAI
 from services.gpt_service import translate_to_user_lang, extract_medcine_name
-from services.utils import softmax_with_temperature, detect_language
+from services.utils import softmax_with_temperature
 from config import OPENAI_API_KEY, MONGODB_URI
 import numpy as np
 import re
