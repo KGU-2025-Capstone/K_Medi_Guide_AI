@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from openai import OpenAI
 from services.gpt_service import translate_to_user_lang, extract_medcine_name
-from services.utils import softmax_with_temperature, detect_language
+from services.utils import softmax_with_temperature
 from config import OPENAI_API_KEY, MONGODB_URI
 import numpy as np
 import re
@@ -22,7 +22,6 @@ def extract_and_match_medicine_name():
     #사용자 입력
     data = request.get_json()
     user_input = data.get("input", "")
-    session['language'] = detect_language(user_input)
 
     #name라우트에서 select라우트로 갈 경우 select출력 문장에서 증상 부분을 제외하기 위한 설정
     session['name_to_select'] = True

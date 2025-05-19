@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from openai import OpenAI
 from services.gpt_service import translate_to_user_lang
-from services.utils import clean_text, softmax_with_temperature, detect_language
+from services.utils import clean_text, softmax_with_temperature
 from bs4 import BeautifulSoup
 import numpy as np
 from config import OPENAI_API_KEY, MONGODB_URI
@@ -25,8 +25,7 @@ def recommend_medicine_by_symptom():
     data = request.get_json()
     symptom_input = data.get("input", "")
 
-    #사용자 입력 언어 감지 및 이전 라우트 확인
-    session['language'] = detect_language(symptom_input)
+    #이전 라우트 확인
     session['name_to_select'] = False
 
     if not symptom_input:

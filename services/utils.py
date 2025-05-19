@@ -25,15 +25,3 @@ def trim_to_token_limit(text, max_tokens, model="gpt-3.5-turbo"):
         return truncated_text[:last_period+1].strip()
     else:
         return truncated_text.strip()
-
-def detect_language(text):
-    if re.search(r"[ㄱ-ㅎㅏ-ㅣ가-힣]", text):
-        return "ko"
-    elif re.search(r"[A-Za-z]", text):
-        return "en"
-    elif re.search(r"[\u3040-\u30ff]", text):  # 히라가나 + 가타카나
-        return "jp"
-    elif re.search(r"[\u4e00-\u9fff]", text):  # 한자 (중국어)
-        return "zh"
-    else:
-        return "ko"  # 기본값은 한국어
