@@ -37,15 +37,20 @@ def recommend_medicine_by_symptom():
 
     #증상 추출 모델
     prompt = f"""
-    다음 문장에서 의학적 증상 키워드만 콤마로 나열해줘. 언어는 한국어, 영어 등 다양할 수 있는데 한국어가 아닐 경우 한국어로 번역해서 나열해줘. 예시나 설명 없이 키워드만 출력해. 
-    정확한 증상명이 없으면 입력 문장을 바탕으로 적절한 일반적 증상명을 의학용어 명사로 출력해. 증상에 대해 의미가 같은 여러 단어로 출력해줘
+    다음 문장에서 **의학적인 증상 키워드**만 한국어 명사 형태로 콤마(,)로 구분하여 나열해줘.
+
+    - 사용자의 입력 언어가 한국어가 아니더라도 결과는 **반드시 한국어**로 출력해.
+    - 의미가 같은 **관련 의학 용어**도 함께 출력해줘.
+    - 반드시 **명사 형태**로만 출력하고, 증상 이외의 단어나 문장은 제외해.
+    - 예시나 설명 없이 **결과만 출력**해.
+
     문장: "{symptom_input}"
-    """
+"""
     try:
         extract_response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "의학적 증상을 추출하는 도우미야."},
+                {"role": "system", "content": "너는 사용자의 문장에서 의학적 증상을 추출하는 도우미야. 출력은 반드시 한국어 명사형 키워드로 콤마(,)로 나열해."},
                 {"role": "user", "content": "몸이 으슬으슬해"},
                 {"role": "assistant", "content": "오한"},
             
@@ -129,7 +134,6 @@ def recommend_medicine_by_symptom():
         else:
             return jsonify({
                 "error": translate_to_user_lang(f"해당 증상에 맞는 약을 찾지 못했습니다. 더 자세한 증상을 입력해주세요. ({get_retry_count()}/3)"),
-                "extracted_symptoms": [translate_to_user_lang(s) for s in symptoms_ko], #디버깅용 삭제 예정
                 "next": "/symptom"
             }), 404
 
@@ -162,6 +166,5 @@ def recommend_medicine_by_symptom():
         "medicine_candidates": candidates,
         "message": translate_to_user_lang("다음 중 어떤 약이 궁금하신가요?"),
         "next": "/select",
-        "extracted_symptoms": [translate_to_user_lang(s) for s in symptoms_ko], #디버깅용 삭제 예정
         "response_type": "symptom_success"
     })

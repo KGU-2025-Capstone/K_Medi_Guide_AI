@@ -7,6 +7,8 @@ from config import REDIS_PORT
 from config import REDIS_PASSWORD
 import redis
 
+
+
 app = Flask(__name__)
 
 # Flask-Session 설정
