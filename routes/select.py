@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from openai import OpenAI
-from services.gpt_service import translate_to_user_lang, replace_translated_name
+from services.gpt_service import translate_to_user_lang, replace_translated_name, improved_readability
 from services.utils import clean_text
 from concurrent.futures import ThreadPoolExecutor
 from config import OPENAI_API_KEY, MONGODB_URI, FINE_TUNE_SYMPTOM_MODEL, PURE_FINE_TUNE_EFCY_MODEL
@@ -36,6 +36,7 @@ def select_medicine():
     name_ko = result.get("itemName", "")
     name_en = result.get("engName", "")
     combined_name = f"{name_ko}({name_en})" if name_en else name_ko
+    session['combined_name'] = combined_name
     symptoms_ko = session.get('symptoms_ko')
 
     #선택한 약의 가중치를 업데이트
@@ -78,13 +79,14 @@ def select_medicine():
     #이전 라우트가 name이었는지 확인, 최종 출력 메시지 가공
     if session.get('name_to_select') is True:
         final_message = f"{combined_name}은(는) {efcy_response}"
-        insert_text = f"{combined_name}"
+        insert_text = f"<<약이름>>"
     else:
         final_message = f"{symptom_response} {combined_name}은(는) {efcy_response}"
-        insert_text = f"{translate_to_user_lang(symptom_response)} {combined_name}"
+        insert_text = f"{translate_to_user_lang(symptom_response)} <<약이름>>"
 
     final_message = translate_to_user_lang(final_message)
     final_message = replace_translated_name(final_message, insert_text)
+    final_message = improved_readability(final_message)
 
     #정보 반환
     return jsonify({

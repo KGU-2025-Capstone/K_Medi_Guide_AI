@@ -39,7 +39,8 @@ def fallback_response(user_input):
 
         # 이 문맥을 GPT 모델에 제공하여 답변을 도출하게 함
         history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
-        context += f"\n이전 대화:\n{history_text}\n\n이전 대화를 바탕으로 다음 질문에 대답하세요. 잘 모르겠으면 모르겠다고 대답하세요. 이모지와 줄바꿈을 활용해서 가독성이 좋게 대답하세요. 질문: {user_input}"
+        context += f"""\n이전 대화:\n{history_text}\n\n이전 대화를 바탕으로 다음 질문에 대답하세요. 잘 모르겠으면 모르겠다고 대답하세요. 이모지, 줄바꿈, 말머리 기호를 사용해서 가독성이 좋게 대답하세요. 이모지를 기준으로 줄바꿈을 두 번 넣어서
+        문단을 나누세요. 질문: {user_input}"""
 
         # OpenAI API로 메시지 전송
         messages = [
@@ -58,7 +59,6 @@ def fallback_response(user_input):
         # 현재 사용자 질문과 답변을 대화 기록에 추가
         chat_history.append({"role": "user", "content": user_input})
         chat_history.append({"role": "assistant", "content": answer})
-
         return answer
     else:
         return "말씀하신 내용을 잘 이해하지 못했어요."

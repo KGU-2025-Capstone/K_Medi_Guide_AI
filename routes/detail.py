@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
 from openai import OpenAI
-from services.gpt_service import translate_to_user_lang
+from services.gpt_service import translate_to_user_lang, improved_readability, replace_translated_name
 from services.utils import clean_text, trim_to_token_limit
 from concurrent.futures import ThreadPoolExecutor
 from config import OPENAI_API_KEY, MONGODB_URI, FINE_TUNE_USEMETHOD_MODEL, FINE_TUNE_ATPN_MODEL
@@ -83,10 +83,14 @@ def provide_medicine_details():
         use_response = future_use.result()
         atpn_response = future_atpn.result()
 
-        final_message = f"💊{combined_name}\n{use_response}\n{atpn_response}"
 
+        insert_text = f"<<약이름>>"
+        final_message = f"💊{combined_name}{use_response}{atpn_response}"
+        final_message = translate_to_user_lang(final_message)
+        final_message = replace_translated_name(final_message, insert_text)
+        
         return jsonify({
-            "message": translate_to_user_lang(final_message),
+            "message": improved_readability(final_message),
             "addMessage": translate_to_user_lang("더 궁금한 게 있으신가요?"),
             "next": "/start",
             "response_type": "detail_success"
