@@ -9,10 +9,17 @@ from collections import Counter
 # 로그 설정
 logging.basicConfig(level=logging.INFO)
 
-# 모델 로딩 (검색 특화 모델)
-model = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1')
+# 모델 로딩 (정확도 높은 검색 특화 모델)
+model = SentenceTransformer('multi-qa-mpnet-base-dot-v1')
 
 cached_corpus = None
+
+def preprocess_context(context):
+    """
+    너무 긴 문맥은 문단 단위로 쪼개고, 너무 짧은 문장 제거
+    """
+    paragraphs = [p.strip() for p in context.split('\n') if len(p.strip().split()) >= 10]
+    return paragraphs
 
 def load_all_corpus(corpus_dir='rag/data/corpus'):
     global cached_corpus
@@ -29,16 +36,18 @@ def load_all_corpus(corpus_dir='rag/data/corpus'):
     for file_path in file_paths:
         with open(file_path, encoding='utf-8') as f:
             data = json.load(f)
-            corpus.extend(data)
-
-    # context 문장들도 passage 임베딩 방식으로 다시 넣기
-    for c in corpus:
-        if isinstance(c.get("embedding"), list):  # 임베딩 미리 되어 있지 않은 경우에만 다시 계산
-            continue
-        c["embedding"] = model.encode(f"passage: {c['context']}", convert_to_tensor=True)
+            for item in data:
+                filename = item.get("filename", os.path.basename(file_path))
+                for para in preprocess_context(item['context']):
+                    embedding = model.encode(f"passage: {para}", convert_to_tensor=True)
+                    corpus.append({
+                        "context": para,
+                        "embedding": embedding,
+                        "filename": filename
+                    })
 
     cached_corpus = corpus
-    logging.info(f"총 {len(corpus)}개의 문서가 로드되었습니다.")
+    logging.info(f"총 {len(corpus)}개의 문단(context)이 로드되었습니다.")
     return corpus
 
 def extract_keywords(query, num_keywords=5):
@@ -51,23 +60,20 @@ def get_similar_contexts(query, top_k=3):
     corpus = load_all_corpus()
     query_keywords = extract_keywords(query)
 
-    # 검색 특화 모델은 prefix 필요
     query_embedding = model.encode(f"query: {query}", convert_to_tensor=True)
 
     scored_contexts = []
     for c in corpus:
         context = c["context"]
-        if len(context.split()) < 10:
-            continue  # 너무 짧은 문맥은 제외
 
-        # cosine 유사도 계산
         score = util.cos_sim(query_embedding, c["embedding"]).item()
 
-        # 키워드가 몇 개 포함됐는지에 따른 점수 보정
+        # 키워드가 몇 개 포함됐는지에 따른 점수 보정 (비율 기반)
         keyword_matches = sum(1 for kw in query_keywords if kw in context.lower())
-        score += 0.01 * keyword_matches
+        match_ratio = keyword_matches / len(query_keywords) if query_keywords else 0
+        score += 0.05 * match_ratio  # 가중치 강화
 
-        scored_contexts.append((score, context, c.get("filename", "unknown")))
+        scored_contexts.append((score, context, c["filename"]))
 
     top_contexts = sorted(scored_contexts, key=lambda x: x[0], reverse=True)[:top_k]
 

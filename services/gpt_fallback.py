@@ -37,27 +37,33 @@ def fallback_response(user_input):
     
     context = ""  # 로컬 context 초기화
 
-    # if medication_info:
-    #     # DB에서 가져온 정보를 자연스럽게 하나의 문장으로 변환하여 GPT에게 제공
-    #     context += f"약물명: {medication_info.get('itemName', '정보 없음')}\n"
-    #     context += f"효능: {medication_info.get('efcyQesitm', '정보 없음')}\n"
-    #     context += f"복용법: {medication_info.get('useMethodQesitm', '정보 없음')}\n"
-    #     context += f"주의사항: {medication_info.get('atpnQesitm', '정보 없음')}\n"
+    if medication_info:
+        context = f"다음은 사용자의 질문과 관련된 참고 정보입니다:\n\n"
+        # DB에서 가져온 정보를 자연스럽게 하나의 문장으로 변환하여 GPT에게 제공
+        context += f"약물명: {medication_info.get('itemName', '정보 없음')}\n"
+        context += f"효능: {medication_info.get('efcyQesitm', '정보 없음')}\n"
+        context += f"복용법: {medication_info.get('useMethodQesitm', '정보 없음')}\n"
+        context += f"주의사항: {medication_info.get('atpnQesitm', '정보 없음')}\n"
 
-    #     answer = send(user_input, context)
-    #     return answer
+        # answer = send(user_input, context)
+        # return answer
 
-    if rag_contexts:
+        if rag_contexts:
         # 파일명과 context를 보기 좋게 합침
-        context_parts = []
-        for score, text, filename in rag_contexts:
-            part = f"[{filename}] (score: {score:.3f})\n{text}"
-            context_parts.append(part)
-        contexts_joined = "\n\n".join(context_parts)
-        context += "\n\n" + contexts_joined
-        print(context)
+            context_parts = []
+        # 자연어 문맥 포맷 만들기
+            context_parts = []
+            for score, text, filename in rag_contexts:
+                context_parts.append(f"- 관련 정보 ({filename}):\n{text.strip()}")
+
+            contexts_joined = "\n\n".join(context_parts)
+            context += f"\n\n📄 문서에서 찾은 추가 정보:\n\n{contexts_joined}\n\n"
+            print(context)
+
         answer = send(user_input, context)
         return answer
+
+    
 
     else:
         return "말씀하신 내용을 잘 이해하지 못했어요."
@@ -73,7 +79,7 @@ def get_current_chat_history():
 def send(user_input, context):
     # 이 문맥을 GPT 모델에 제공하여 답변을 도출하게 함
     history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
-    context += f"""\n이전 대화:\n{history_text}\n\n이전 대화를 바탕으로 다음 질문에 대답하세요. 잘 모르겠으면 모르겠다고 대답하세요. 이모지, 줄바꿈, 말머리 기호를 사용해서 가독성이 좋게 대답하세요. 이모지를 기준으로 줄바꿈을 두 번 넣어서 문단을 나누세요. 질문: {user_input}"""
+    context += f"""\n이전 대화:\n{history_text}\n\n이전 대화를 바탕으로 다음 질문에 대답하세요. 참고 정보를 기반으로 가능한 한 정확하게 답해주세요.  잘 모르겠으면 모르겠다고 대답하세요. 이모지, 줄바꿈, 말머리 기호를 사용해서 가독성이 좋게 대답하세요. 이모지를 기준으로 줄바꿈을 두 번 넣어서 문단을 나누세요. 질문: {user_input}"""
 
     # OpenAI API로 메시지 전송
     messages = [
@@ -81,7 +87,7 @@ def send(user_input, context):
         "role": "system",
         "content": (
             "당신은 한국에 거주하는 외국인을 도와주는 친절한 약국 상담 챗봇입니다. "
-            "반드시 아래 주어진 정보(context)만 참고해서 답변하세요. "
+            "반드시 참고정보(context)만을 참고해서 답변하세요. "
             "모르는 내용이면 모른다고 솔직하게 대답하세요."
         )
     },
