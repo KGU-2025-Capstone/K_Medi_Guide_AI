@@ -48,23 +48,22 @@ def fallback_response(user_input):
         # answer = send(user_input, context)
         # return answer
 
-        if rag_contexts:
+    if rag_contexts:
         # 파일명과 context를 보기 좋게 합침
-            context_parts = []
+        print("통과")
+        context_parts = []
         # 자연어 문맥 포맷 만들기
-            context_parts = []
-            for score, text, filename in rag_contexts:
-                context_parts.append(f"- 관련 정보 ({filename}):\n{text.strip()}")
+        context_parts = []
+        for score, text, filename in rag_contexts:
+            context_parts.append(f"- 관련 정보 ({filename}):\n{text.strip()}")
 
-            contexts_joined = "\n\n".join(context_parts)
-            context += f"\n\n📄 문서에서 찾은 추가 정보:\n\n{contexts_joined}\n\n"
-            print(context)
+        contexts_joined = "\n\n".join(context_parts)
+        context += f"\n\n📄 문서에서 찾은 추가 정보:\n\n{contexts_joined}\n\n"
+        print(context)
 
+    if (rag_contexts or medication_info):  
         answer = send(user_input, context)
         return answer
-
-    
-
     else:
         return "말씀하신 내용을 잘 이해하지 못했어요."
     
