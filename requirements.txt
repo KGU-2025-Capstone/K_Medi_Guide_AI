@@ -5,3 +5,8 @@ dotenv
 bs4
 numpy
 tiktoken
+sentence-transformers
+keybert
+scikit-learn
+python-docx
+matplotlib
