@@ -10,3 +10,5 @@ keybert
 scikit-learn
 python-docx
 matplotlib
+flask_session
+redis
