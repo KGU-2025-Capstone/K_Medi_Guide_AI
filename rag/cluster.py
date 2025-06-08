@@ -73,13 +73,13 @@ def cluster_all_documents_summary(summaries_folder, output_path, method='kmeans'
 
     print(f"  저장 완료: {output_path}")
 
-    plt.figure(figsize=(6, 4))
-    plt.plot(list(cluster_range), sse, marker='o')
-    plt.title(f"Elbow Method - 전체 문서")
-    plt.xlabel("Number of clusters (k)")
-    plt.ylabel("Sum of Squared Errors (SSE)")
-    plt.grid(True)
-    plt.show()
+    # plt.figure(figsize=(6, 4))
+    # plt.plot(list(cluster_range), sse, marker='o')
+    # plt.title(f"Elbow Method - 전체 문서")
+    # plt.xlabel("Number of clusters (k)")
+    # plt.ylabel("Sum of Squared Errors (SSE)")
+    # plt.grid(True)
+    # plt.show()
 
 if __name__ == "__main__":
     summaries_folder = "rag/data/summaries"
